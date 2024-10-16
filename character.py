@@ -13,7 +13,8 @@ class Character:
         # 캐릭터 이미지
         self.image = load_image('animation_sheet.png')
         # 캐릭터 상태 (정지, 걷기, 달리기, 점프, 피격?, 공격?)
-        self.state = 0
+        self.state = 3 # | 0 : stop | 1 : walk | 2 : run | 3 : jumping | 4 : ?? | 5 : ?? |
+                       # 지금은 스프라이트에 맞춰 사용 | 1 : walk | 3 : stop |
         pass
 
     def update(self):
@@ -28,7 +29,7 @@ class Character:
     def draw(self):
         # 캐릭터가 그려져야겠지
         if self.dir == 0:
-            self.image.clip_composite_draw(self.frame * 100, 300, 100, 100, 0, 'h', self.x, self.y, 100, 100)
+            self.image.clip_composite_draw(self.frame * 100, self.state * 100, 100, 100, 0, 'h', self.x, self.y, 100, 100)
         else:
-            self.image.clip_draw(self.frame * 100, 300, 100, 100, self.x, self.y)
+            self.image.clip_draw(self.frame * 100, self.state * 100, 100, 100, self.x, self.y)
         pass
