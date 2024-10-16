@@ -7,7 +7,7 @@ class Character:
         # 일단 필요한 것을 생각해보자
         # 캐릭터의 좌표값, 방향 (x, y) / (Left, Right)
         self.x, self.y = 400, 90
-        self.dir = 0
+        self.dir = 1 # | 0 : LEFT | 1 : RIGHT |
         # 캐릭터 프래임
         self.frame = 0
         # 캐릭터 이미지
@@ -27,5 +27,8 @@ class Character:
 
     def draw(self):
         # 캐릭터가 그려져야겠지
-        self.image.clip_draw(self.frame * 100, 300, 100, 100, self.x, self.y)
+        if self.dir == 0:
+            self.image.clip_composite_draw(self.frame * 100, 300, 100, 100, 0, 'h', self.x, self.y, 100, 100)
+        else:
+            self.image.clip_draw(self.frame * 100, 300, 100, 100, self.x, self.y)
         pass
