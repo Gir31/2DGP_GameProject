@@ -70,6 +70,6 @@ while running:
     render_world()
     handle_events()
     boy.x += boy.speed
-    delay(0.05)
+    delay(0.03)
 # finalization code
 close_canvas()
