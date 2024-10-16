@@ -13,18 +13,22 @@ def handle_events():
             if event.key == SDLK_RIGHT:
                 boy.state = 1
                 boy.dir = 1
+                boy.speed += 2
             elif event.key == SDLK_LEFT:
                 boy.state = 1
                 boy.dir = 0
+                boy.speed -= 2
             elif event.key == SDLK_ESCAPE:
                 running = False
         elif event.type == SDL_KEYUP:
             if event.key == SDLK_RIGHT:
                 boy.state = 3
                 boy.dir = 1
+                boy.speed -= 2
             elif event.key == SDLK_LEFT:
                 boy.state = 3
                 boy.dir = 0
+                boy.speed += 2
         else:
             boy.handle_event(event)
 
@@ -59,6 +63,7 @@ while running:
     update_world()
     render_world()
     handle_events()
+    boy.x += boy.speed
     delay(0.05)
 # finalization code
 close_canvas()

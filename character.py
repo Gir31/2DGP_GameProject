@@ -8,6 +8,7 @@ class Character:
         # 캐릭터의 좌표값, 방향 (x, y) / (Left, Right)
         self.x, self.y = 400, 90
         self.dir = 1 # | 0 : LEFT | 1 : RIGHT |
+        self.speed = 0 # | 정지, 걸을 때, 달릴 때 |
         # 캐릭터 프래임
         self.frame = 0
         # 캐릭터 이미지
