@@ -18,6 +18,9 @@ def handle_events():
                 boy.state = 1
                 boy.dir = 0
                 boy.speed -= 2
+            elif event.key == SDLK_UP:
+                boy.state = 1
+                boy.y += 30
             elif event.key == SDLK_ESCAPE:
                 running = False
         elif event.type == SDL_KEYUP:
@@ -29,6 +32,9 @@ def handle_events():
                 boy.state = 3
                 boy.dir = 0
                 boy.speed += 2
+            elif event.key == SDLK_UP:
+                boy.state = 1
+                boy.y -= 30
         else:
             boy.handle_event(event)
 
