@@ -1,25 +1,50 @@
 from pico2d import *
 
-class character:
+from character import Character
 
-    def __init__(self):
-        # 일단 필요한 것을 생각해보자
-        # 캐릭터의 좌표값, 방향 (x, y) / (Left, Right)
-        # 캐릭터 프래임
-        # 캐릭터 이미지
-        # 캐릭터 상태 (정지, 걷기, 달리기, 점프, 피격?, 공격?)
-        self.x, self.y, self.dir, self.frame, self.state, self.img = 0, 0, 0, 0, 0, 0
-        pass
+def handle_events():
+    global running
 
-    def update(self):
-        # 캐릭터의 프래임이 바뀌며 애니메이션이 바뀔거야
-        pass
+    events = get_events()
+    for event in events:
+        if event.type == SDL_QUIT:
+            running = False
+        elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
+            running = False
+        else:
+            boy.handle_event(event)
 
-    def handle_event(self, event):
-        # 캐릭터 상태 다루는 함수 / 아직 안배웠지만 해보자고
-        pass
+def reset_world():
+    global running
+    global world
+    global boy
 
-    def draw(self):
-        # 캐릭터가 그려져야겠지
-        self.image.clip_draw()
-        pass
+    running = True
+    world = []
+
+    boy = Character()
+    world.append(boy)
+
+def update_world():
+    for o in world:
+        o.update()
+    pass
+
+
+def render_world():
+    clear_canvas()
+    for o in world:
+        o.draw()
+    update_canvas()
+
+
+open_canvas()
+reset_world()
+# game loop
+while running:
+    update_world()
+    render_world()
+    handle_events()
+    delay(0.01)
+# finalization code
+close_canvas()
