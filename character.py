@@ -22,6 +22,8 @@ class Character:
 
     def update(self):
         # 캐릭터의 프래임이 바뀌며 애니메이션이 바뀔거야
+        if self.dir_y != 5 :
+            self.fall()
         self.jump()
         self.frame = (self.frame + 1) % 8
         pass
@@ -30,8 +32,16 @@ class Character:
         # 캐릭터 상태 다루는 함수 / 아직 안배웠지만 해보자고
         pass
 
+    def touch_floor(self):
+        if self.y > 90:
+            return True
+        return False
+
     def fall(self):
         # 캐릭터가 중력의 영향을 받아 떨어지는 함수 / 바닥에 닿으면 더이상 떨어지지 않는다
+        if self.touch_floor():
+            self.y -= 5
+
         pass
 
     def jump(self):
