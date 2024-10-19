@@ -19,8 +19,9 @@ def handle_events():
                 boy.dir_x = 0
                 boy.speed -= 2
             elif event.key == SDLK_UP:
-                boy.state = 1
-                boy.dir_y = 5
+                if boy.touch_floor() == True:
+                    boy.state = 1
+                    boy.dir_y = 5
             elif event.key == SDLK_ESCAPE:
                 running = False
         elif event.type == SDL_KEYUP:

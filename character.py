@@ -33,13 +33,14 @@ class Character:
         pass
 
     def touch_floor(self):
+        # 바닥 클래스를 만들면 바닥과 확인하는 것으로
         if self.y > 90:
-            return True
-        return False
+            return False
+        return True
 
     def fall(self):
         # 캐릭터가 중력의 영향을 받아 떨어지는 함수 / 바닥에 닿으면 더이상 떨어지지 않는다
-        if self.touch_floor():
+        if self.touch_floor() == False:
             self.y -= 5
 
         pass
@@ -47,8 +48,8 @@ class Character:
     def jump(self):
         # 캐릭터가 일정 높이까지 점프하게 하는 함수
         if self.dir_y == 5:
-            jump_y = self.y + self.MAX_JUMP # 점프의 목표치
-            if(self.MAX_JUMP > 0):
+            jump_y = self.y + self.MAX_JUMP  # 점프의 목표치
+            if (self.MAX_JUMP > 0):
                 self.y += self.dir_y
                 self.MAX_JUMP -= self.dir_y
             else:
