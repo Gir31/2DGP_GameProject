@@ -1,66 +1,138 @@
 from pico2d import load_image
+from state_machine import *
+
+class Idle:
+    @staticmethod
+    def enter(character, e):
+        if start_event(e):
+            character.action = 1
+            character.face_dir = 1
+        elif right_down(e) or left_up(e):
+            character.action = 1
+            character.face_dir = -1
+        elif left_down(e) or right_up(e):
+            character.action = 1
+            character.face_dir = 1
+        elif down_down(e) or down_up(e):
+            character.action = 1
+
+        character.frame = 0
+
+    @staticmethod
+    def exit(character, e):
+        pass
+
+    @staticmethod
+    def do(character):
+        character.frame = (character.frame + 1) % 7
+
+    @staticmethod
+    def draw(character):
+        if character.face_dir == 1:
+            character.image.clip_draw(character.frame * 124, character.action * 124, 124, 124, character.x, character.y)
+        elif character.face_dir == -1:
+            character.image.clip_composite_draw(character.frame * 124, character.action * 124, 124, 124,
+                                                0, 'h', character.x, character.y, 124, 124)
+
+class Run:
+    @staticmethod
+    def enter(character, e):
+        if right_down(e) or left_up(e):
+            character.dir, character.face_dir, character.action = 1, 1, 9
+        elif left_down(e) or right_up(e):
+            character.dir, character.face_dir, character.action = -1, -1, 9
+
+    @staticmethod
+    def exit(character, e):
+        pass
+
+
+    @staticmethod
+    def do(character):
+        character.frame = (character.frame + 1) % 9
+        character.x += character.dir * 10
+        pass
+
+    @staticmethod
+    def draw(character):
+        if character.face_dir == 1:
+            character.image.clip_draw(character.frame * 124, character.action * 124, 124, 124, character.x, character.y)
+        elif character.face_dir == -1:
+            character.image.clip_composite_draw(character.frame * 124, character.action * 124, 124, 124,
+                                                0, 'h', character.x, character.y, 124, 124)
+
+class Sit:
+    @staticmethod
+    def enter(character, e):
+        character.action = 1
+        character.frame = 0
+
+    @staticmethod
+    def exit(character, e):
+        pass
+
+    @staticmethod
+    def do(character):
+        character.frame = (character.frame + 1) % 8
+        pass
+
+    @staticmethod
+    def draw(character):
+        if character.face_dir == 1:
+            character.image.clip_draw((character.frame + 7) * 124, character.action * 124, 124, 124, character.x, character.y)
+        elif character.face_dir == -1:
+            character.image.clip_composite_draw((character.frame + 7) * 124, character.action * 124, 124, 124,
+                                                0, 'h', character.x, character.y, 124, 124)
+
+class Fall:
+    @staticmethod
+    def enter(character, e):
+        character.action = 0
+        character.frame = 0
+
+    @staticmethod
+    def exit(character, e):
+        pass
+
+    @staticmethod
+    def do(character):
+        character.frame = (character.frame + 1) % 3
+        pass
+
+    @staticmethod
+    def draw(character):
+        if character.face_dir == 1:
+            character.image.clip_draw(character.frame * 124, character.action * 124, 124, 124, character.x, character.y)
+        elif character.face_dir == -1:
+            character.image.clip_composite_draw(character.frame * 124, character.action * 124, 124, 124,
+                                                0, 'h', character.x, character.y, 124, 124)
 
 
 class Character:
-    # 일단은 캐릭터 스프라이트 얻기 전까지는 수업때 쓰던걸로 구현
+
     def __init__(self):
-        # 일단 필요한 것을 생각해보자
-        # 캐릭터의 좌표값, 방향 (x, y) / (Left, Right)
         self.x, self.y = 400, 90
-        self.MAX_JUMP = 50 # 점프를 위한 변수
-        self.dir_x = 1 # | 0 : LEFT | 1 : RIGHT |
-        self.dir_y = 0 # | 0 : stay | 5 : jump / jump의 speed |
-        self.speed = 0 # | 정지, 걸을 때, 달릴 때 |
-        # 캐릭터 프래임
-        self.frame = 0
-        # 캐릭터 이미지
-        self.image = load_image('animation_sheet.png')
-        # 캐릭터 상태 (정지, 걷기, 달리기, 점프, 피격?, 공격?)
-        self.state = 3 # | 0 : stop | 1 : walk | 2 : run | 3 : jumping | 4 : ?? | 5 : ?? |
-                       # 지금은 스프라이트에 맞춰 사용 | 1 : walk | 3 : stop |
-        pass
+        self.face_dir = 1
+        self.image = load_image('character.png')
+        self.state_machine = StateMachine(self)
+        self.state_machine.start(Idle)
+        self.state_machine.set_transitions(
+            {
+                Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, down_down : Sit, down_up : Sit},
+                Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle},
+                Sit: {right_down: Run, left_down: Run, right_up: Run, left_up: Run},
+                Fall: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle, down_down : Idle, down_up : Idle}
+            }
+        )
 
     def update(self):
-        # 캐릭터의 프래임이 바뀌며 애니메이션이 바뀔거야
-        if self.dir_y != 5 :
-            self.fall()
-        self.jump()
-        self.frame = (self.frame + 1) % 8
-        pass
+        self.state_machine.update()
 
     def handle_event(self, event):
-        # 캐릭터 상태 다루는 함수 / 아직 안배웠지만 해보자고
-        pass
-
-    def touch_floor(self):
-        # 바닥 클래스를 만들면 바닥과 확인하는 것으로
-        if self.y > 90:
-            return False
-        return True
-
-    def fall(self):
-        # 캐릭터가 중력의 영향을 받아 떨어지는 함수 / 바닥에 닿으면 더이상 떨어지지 않는다
-        if self.touch_floor() == False:
-            self.y -= 5
-
-        pass
-
-    def jump(self):
-        # 캐릭터가 일정 높이까지 점프하게 하는 함수
-        if self.dir_y == 5:
-            jump_y = self.y + self.MAX_JUMP  # 점프의 목표치
-            if (self.MAX_JUMP > 0):
-                self.y += self.dir_y
-                self.MAX_JUMP -= self.dir_y
-            else:
-                self.MAX_JUMP = 50
-                self.dir_y = 0
+        self.state_machine.add_event(('INPUT', event))
         pass
 
     def draw(self):
-        # 캐릭터가 그려져야겠지
-        if self.dir_x == 0:
-            self.image.clip_composite_draw(self.frame * 100, self.state * 100, 100, 100, 0, 'h', self.x, self.y, 100, 100)
-        else:
-            self.image.clip_draw(self.frame * 100, self.state * 100, 100, 100, self.x, self.y)
-        pass
+        self.state_machine.draw()
+
+
