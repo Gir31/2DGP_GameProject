@@ -3,6 +3,7 @@ import game_world
 import game_framework
 from floor_locate import *
 from character import Character
+from grass import Grass
 from land import Land
 
 
@@ -14,16 +15,11 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.quit()
         else:
-            if ((event.type, event.key) == (SDL_KEYDOWN, SDLK_RIGHT)) or ((event.type, event.key) == (SDL_KEYUP, SDLK_LEFT)):
-                character.face_dir = 1
-            elif((event.type, event.key) == (SDL_KEYDOWN, SDLK_LEFT)) or ((event.type, event.key) == (SDL_KEYUP, SDLK_RIGHT)):
-                character.face_dir = -1
-
             character.handle_event(event)
 
 
 def init():
-    global character, land
+    global character
 
     character = Character()
     game_world.add_object(character, 3)
@@ -31,6 +27,11 @@ def init():
     for x, y in floor_locate[Stage]:
         land = Land(x, y)
         game_world.add_object(land, 1)
+
+    grass = Grass()
+    game_world.add_object(grass, 0)
+
+
 
 def finish():
     game_world.clear()

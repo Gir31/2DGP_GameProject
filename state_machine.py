@@ -34,8 +34,14 @@ def space_up(e):
 def time_out(e):
     return e[0] == 'TIME_OUT'
 
+def motion_finish(e):
+    return e[0] == 'MOTION_FINISH'
+
 def character_landing(e):
     return e[0] == 'LANDING'
+
+def character_falling(e):
+    return e[0] == 'FALL'
 
 
 class StateMachine:
@@ -45,12 +51,13 @@ class StateMachine:
 
     def start(self, state):
         self.cur_state = state
-
-        print(f'Enter into {state}')
         self.cur_state.enter(self.o, ('START', 0))
 
     def add_event(self, e):
         self.event_que.append(e)
+
+    def remove_event(self):
+        pass
 
     def set_transitions(self, transitions):
         self.transitions = transitions
