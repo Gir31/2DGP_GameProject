@@ -20,6 +20,7 @@ def handle_events():
 
 def init():
     global character
+    global land
 
     character = Character()
     game_world.add_object(character, 3)
