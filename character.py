@@ -1,14 +1,33 @@
 from pico2d import load_image, get_time
 
+import game_framework
 from state_machine import *
 from floor_locate import *
 
+def frame_value(frame, FRAMES_PER_ACTION):
+    TIME_PER_ACTION = 0.3
+    ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
+
+    return (frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
+
+
+def speed_value(KMPH):
+    PIXEL_PER_METER = (10.0 / 0.2)
+    RUN_SPEED_KMPH = KMPH
+    RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
+    RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
+    RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
+
+    return RUN_SPEED_PPS * game_framework.frame_time
+
+
 def drawing(character, count):
     if character.face_dir == 1:
-        character.image.clip_draw((character.frame + count) * 124, character.action * 124, 124, 124, character.x, character.y - 5)
+        character.image.clip_draw(int(character.frame + count) * 124, character.action * 124, 124, 124, character.x, character.y - 5)
     elif character.face_dir == -1:
-        character.image.clip_composite_draw((character.frame + count) * 124, character.action * 124, 124, 124,
+        character.image.clip_composite_draw(int(character.frame + count) * 124, character.action * 124, 124, 124,
                                             0, 'h', character.x, character.y - 5, 124, 124)
+
 
 def landing(character):
     # 스테이지의 바닥을 찾았다면 멈추기
@@ -26,6 +45,7 @@ def landing(character):
                 return
 
     character.state_machine.add_event(('FALL', 0))
+
 
 class Idle:
     @staticmethod
@@ -47,11 +67,12 @@ class Idle:
 
     @staticmethod
     def do(character):
-        character.frame = (character.frame + 1) % 7
+        character.frame = frame_value(character.frame, 7)
 
     @staticmethod
     def draw(character):
         drawing(character, 0)
+
 
 class Run:
     @staticmethod
@@ -66,17 +87,17 @@ class Run:
     def exit(character, e):
         pass
 
-
     @staticmethod
     def do(character):
-        character.frame = (character.frame + 1) % 9
-        character.x += character.dir * 10
+        character.frame = frame_value(character.frame, 9)
+        character.x += character.dir * speed_value(30.0)
         landing(character)
         pass
 
     @staticmethod
     def draw(character):
         drawing(character, 0)
+
 
 class Sit:
     @staticmethod
@@ -92,12 +113,13 @@ class Sit:
 
     @staticmethod
     def do(character):
-        character.frame = (character.frame + 1) % 8
+        character.frame = frame_value(character.frame, 8)
         pass
 
     @staticmethod
     def draw(character):
         drawing(character, 7)
+
 
 class JumpIdle:
     @staticmethod
@@ -119,8 +141,8 @@ class JumpIdle:
     @staticmethod
     def do(character):
         if character.frame < 4:
-            character.frame = (character.frame + 1) % 5
-        character.y += 10
+            character.frame = frame_value(character.frame, 5)
+        character.y += speed_value(40.0)
         if get_time() - character.jump_time > 0.5:
             character.state_machine.add_event(('TIME_OUT', 0))
 
@@ -128,10 +150,14 @@ class JumpIdle:
     def draw(character):
         drawing(character, 0)
 
+
 class JumpMove:
     @staticmethod
     def enter(character, e):
-        character.dir = 0
+        if space_down(e):
+            character.action = 0
+            character.frame = 0
+            character.jump_time = get_time()
         if right_down(e) or left_up(e):
             character.dir, character.face_dir = 1, 1
         elif left_down(e) or right_up(e):
@@ -144,9 +170,10 @@ class JumpMove:
     @staticmethod
     def do(character):
         if character.frame < 4:
-            character.frame = (character.frame + 1) % 5
-        character.y += 10
-        character.x += character.dir * 7
+            character.frame = frame_value(character.frame, 5)
+
+        character.y += speed_value(40.0)
+        character.x += character.dir * speed_value(40.0)
         if get_time() - character.jump_time > 0.5:
             character.state_machine.add_event(('TIME_OUT', 0))
 
@@ -167,14 +194,15 @@ class FallFromJump:
 
     @staticmethod
     def do(character):
-        character.frame = (character.frame + 1) % 4
+        character.frame = frame_value(character.frame, 4)
 
-        if character.frame == 3:
+        if character.frame > 3:
             character.state_machine.add_event(('MOTION_FINISH', 0))
 
     @staticmethod
     def draw(character):
         drawing(character, 8)
+
 
 class FallIdle:
     @staticmethod
@@ -194,9 +222,9 @@ class FallIdle:
 
     @staticmethod
     def do(character):
-        character.y -= 10
+        character.y -= speed_value(35.30394)
         if character.frame < 2:
-            character.frame = (character.frame + 1) % 3
+            character.frame = frame_value(character.frame, 3)
 
         landing(character)
         pass
@@ -204,6 +232,7 @@ class FallIdle:
     @staticmethod
     def draw(character):
         drawing(character, 5)
+
 
 class FallMove:
     @staticmethod
@@ -219,10 +248,10 @@ class FallMove:
 
     @staticmethod
     def do(character):
-        character.y -= 10
-        character.x += character.dir * 7
+        character.y -= speed_value(35.30394)
+        character.x += character.dir * speed_value(40.0)
         if character.frame < 2:
-            character.frame = (character.frame + 1) % 3
+            character.frame = frame_value(character.frame, 3)
 
         landing(character)
         pass
@@ -230,6 +259,7 @@ class FallMove:
     @staticmethod
     def draw(character):
         drawing(character, 5)
+
 
 class Land:
     @staticmethod
@@ -244,9 +274,9 @@ class Land:
 
     @staticmethod
     def do(character):
-        character.frame = (character.frame + 1) % 4
+        character.frame = frame_value(character.frame, 4)
 
-        if character.frame == 3:
+        if character.frame > 3:
             character.state_machine.add_event(('MOTION_FINISH', 0))
         pass
 
@@ -254,11 +284,11 @@ class Land:
     def draw(character):
         drawing(character, 12)
 
+
 class Character:
 
     def __init__(self):
         self.x, self.y = 400, 112
-        self.landingY = self.y
         self.face_dir = 1
         self.jump_time = 0
         self.image = load_image('character.png')
@@ -267,7 +297,7 @@ class Character:
         self.state_machine.set_transitions(
             {
                 Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, down_down : Sit, space_down : JumpIdle},
-                Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle, space_down : JumpIdle, character_landing : Run, character_falling : FallIdle},
+                Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle, space_down : JumpMove, character_landing : Idle, character_falling : FallIdle},
                 Sit: {right_down: Run, left_down: Run, right_up: Run, left_up: Run},
                 JumpIdle: {right_down: JumpMove, left_down: JumpMove, right_up: JumpMove, left_up: JumpMove, time_out : FallFromJump},
                 JumpMove: {right_down: JumpIdle, left_down: JumpIdle, right_up: JumpIdle, left_up: JumpIdle, time_out : FallFromJump},
