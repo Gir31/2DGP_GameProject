@@ -1,7 +1,10 @@
+from math import floor
+
 from pico2d import load_image, get_time, draw_rectangle
 from sdl2.examples.draw import draw_rects
 
 import game_framework
+import play_mode
 from state_machine import *
 from floor_locate import *
 
@@ -21,32 +24,12 @@ def drawing(character, count):
         character.image.clip_composite_draw(int(character.frame + count) * 124, character.action * 124, 124, 124,
                                             0, 'h', character.x, character.y - 5, 124, 124)
 
+def landing(c):
+    c_bb = c.get_bb()
+    for floor in play_mode.floors:
+        f_bb = floor.get_bb()
+        print(f_bb)
 
-
-
-
-
-
-
-
-
-
-def landing(character):
-    # 스테이지의 바닥을 찾았다면 멈추기
-    if character.y <= 112:
-        character.state_machine.add_event(('LANDING', 0))
-        character.y = 112
-        return
-
-    # 스테이지 내의 인공 구조물을 찾았다면 멈추기
-    for x, y in floor_locate[Stage]:
-        if character.x >= x - 77 and character.x <= x + 77:  # 캐릭터가 플랫폼의 x범위 내에 있는가?
-            if character.y <= y + 79 and character.y > y + 69 :
-                character.state_machine.add_event(('LANDING', 0))
-                character.y = y + 79
-                return
-
-    character.state_machine.add_event(('FALL', 0))
 
 
 class Idle:
@@ -83,8 +66,8 @@ class Run:
             character.dir, character.face_dir = 1, 1
         elif left_down(e) or right_up(e):
             character.dir, character.face_dir = -1, -1
-
         character.action = 9
+        landing(character)
     @staticmethod
     def exit(character, e):
         pass
@@ -93,7 +76,6 @@ class Run:
     def do(character):
         character.frame = (character.frame + 9 * ACTION_PER_TIME * game_framework.frame_time) % 9
         character.x += character.dir * RUN_SPEED_PPS * game_framework.frame_time
-        pass
 
     @staticmethod
     def draw(character):
@@ -227,9 +209,6 @@ class FallIdle:
         if character.frame < 2:
             character.frame = (character.frame + 3 * ACTION_PER_TIME * game_framework.frame_time) % 3
 
-        landing(character)
-        pass
-
     @staticmethod
     def draw(character):
         drawing(character, 5)
@@ -253,9 +232,6 @@ class FallMove:
         character.x += character.dir * RUN_SPEED_PPS * game_framework.frame_time
         if character.frame < 2:
             character.frame = (character.frame + 3 * ACTION_PER_TIME * game_framework.frame_time) % 3
-
-        landing(character)
-        pass
 
     @staticmethod
     def draw(character):
@@ -298,11 +274,11 @@ class Character:
         self.state_machine.set_transitions(
             {
                 Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, down_down : Sit, space_down : JumpIdle},
-                Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle, space_down : JumpMove, character_landing : Idle, character_falling : FallIdle},
+                Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle, space_down : JumpMove},
                 Sit: {right_down: Run, left_down: Run, right_up: Run, left_up: Run},
                 JumpIdle: {right_down: JumpMove, left_down: JumpMove, right_up: JumpMove, left_up: JumpMove, time_out : FallFromJump},
                 JumpMove: {right_down: JumpIdle, left_down: JumpIdle, right_up: JumpIdle, left_up: JumpIdle, time_out : FallFromJump},
-                FallFromJump : {motion_finish : FallIdle},
+                FallFromJump : {right_down: FallMove, left_down: FallMove, right_up: FallMove, left_up: FallMove, motion_finish : FallIdle},
                 FallIdle: {right_down: FallMove, left_down: FallMove, right_up: FallMove, left_up: FallMove, character_landing : Land},
                 FallMove: {right_down: FallIdle, left_down: FallIdle, right_up: FallIdle, left_up: FallIdle, character_landing : Land},
                 Land: {right_down: Run, left_down: Run, right_up: Run, left_up: Run, motion_finish : Idle}
@@ -324,8 +300,6 @@ class Character:
         return self.x - 25, self.y - 63, self.x + 25, self.y + 50
 
     def handle_collision(self, group, other):
-        if 'character:land':
-            self.state_machine.add_event(('LANDING', 0))
-        pass
-
-
+        if 'character:floor' or 'character:land':
+            if self.state_machine.cur_state == FallIdle or self.state_machine.cur_state == FallMove:
+                self.state_machine.add_event(('LANDING', 0))

@@ -20,20 +20,24 @@ def handle_events():
 
 def init():
     global character
-    global land
+    global floors
 
     character = Character()
     game_world.add_object(character, 3)
 
+    game_world.add_collision_pair('character:floor', character, None)
+
+    floors = [Land(x, y) for x, y in floor_locate[Stage]]
+    game_world.add_objects(floors, 1)
+
+    for floor in floors:
+        game_world.add_collision_pair('character:floor', None, floor)
+
     game_world.add_collision_pair('character:land', character, None)
-
-    for x, y in floor_locate[Stage]:
-        land = Land(x, y)
-        game_world.add_object(land, 1)
-        game_world.add_collision_pair('character:land', None, land)
-
     grass = Grass()
     game_world.add_object(grass, 0)
+    game_world.add_collision_pair('character:land', None, grass)
+
 
 
 
