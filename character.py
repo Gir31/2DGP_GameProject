@@ -22,6 +22,18 @@ def drawing(character, count):
     elif character.face_dir == -1:
         character.image.clip_composite_draw(int(character.frame + count) * 124, character.action * 124, 124, 124,
                                             0, 'h', character.x, character.y - 5, 124, 124)
+#self.x - 25, self.y - 63, self.x + 25, self.y + 50
+def check_air(character):
+    for x, y in floor_locate[Stage]:
+        minX, minY, maxX, maxY = x - 77, y + 10, x + 77, y + 17
+        if character.y - 66 >= minY and character.y - 66 <= maxY:
+            if character.x >= minX - 25 and character.x <= maxX + 25:
+                return
+
+    if character.y - 66 <= 67:
+        return
+
+    character.state_machine.add_event(('FALL', 0))
 
 
 class Idle:
@@ -59,6 +71,7 @@ class Run:
         elif left_down(e) or right_up(e):
             character.dir, character.face_dir = -1, -1
         character.action = 9
+
     @staticmethod
     def exit(character, e):
         pass
@@ -67,6 +80,8 @@ class Run:
     def do(character):
         character.frame = (character.frame + 8 * ACTION_PER_TIME * game_framework.frame_time) % 8
         character.x += character.dir * RUN_SPEED_PPS * game_framework.frame_time
+
+        check_air(character)
 
     @staticmethod
     def draw(character):
@@ -268,7 +283,7 @@ class Character:
         self.state_machine.set_transitions(
             {
                 Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, down_down : Sit, space_down : JumpIdle},
-                Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle, space_down : JumpMove},
+                Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle, space_down : JumpMove, character_falling : FallIdle},
                 Sit: {right_down: Run, left_down: Run, right_up: Run, left_up: Run},
                 JumpIdle: {right_down: JumpMove, left_down: JumpMove, right_up: JumpMove, left_up: JumpMove, time_out : FallFromJump},
                 JumpMove: {right_down: JumpIdle, left_down: JumpIdle, right_up: JumpIdle, left_up: JumpIdle, time_out : FallFromJump},
@@ -291,7 +306,7 @@ class Character:
         draw_rectangle(*self.get_bb())
 
     def get_bb(self):
-        return self.x - 25, self.y - 63, self.x + 25, self.y + 50
+        return self.x - 25, self.y - 66, self.x + 25, self.y + 50
 
     def handle_collision(self, group, other):
         if 'character:floor' or 'character:land':
