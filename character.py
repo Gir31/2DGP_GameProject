@@ -196,7 +196,7 @@ class FallFromJump:
 class FallIdle:
     @staticmethod
     def enter(character, e):
-        if motion_finish(e):
+        if motion_finish(e) or character_falling(e):
             character.action = 0
             character.frame = 0
         elif right_down(e) or left_up(e):
@@ -223,7 +223,7 @@ class FallIdle:
 class FallMove:
     @staticmethod
     def enter(character, e):
-        if motion_finish(e):
+        if motion_finish(e) or character_falling(e):
             character.action = 0
             character.frame = 0
         elif right_down(e) or left_up(e):

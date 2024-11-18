@@ -42,8 +42,8 @@ def init():
     for land in lands:
         game_world.add_collision_pair('character:land', None, land)
 
-    background = Background(Stage)
-    game_world.add_object(background, 0)
+    #background = Background(Stage)
+    #game_world.add_object(background, 0)
 
     gate = Gate(Stage)
     game_world.add_object(gate, 1)
