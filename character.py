@@ -4,11 +4,10 @@ from pico2d import load_image, get_time, draw_rectangle
 from sdl2.examples.draw import draw_rects
 
 import game_framework
-import play_mode
 from state_machine import *
-from floor_locate import *
+from object_locate import *
 
-TIME_PER_ACTION = 0.3
+TIME_PER_ACTION = 0.7
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 
 PIXEL_PER_METER = (10.0 / 0.2)
@@ -23,13 +22,6 @@ def drawing(character, count):
     elif character.face_dir == -1:
         character.image.clip_composite_draw(int(character.frame + count) * 124, character.action * 124, 124, 124,
                                             0, 'h', character.x, character.y - 5, 124, 124)
-
-def landing(c):
-    c_bb = c.get_bb()
-    for floor in play_mode.floors:
-        f_bb = floor.get_bb()
-        print(f_bb)
-
 
 
 class Idle:
@@ -67,19 +59,18 @@ class Run:
         elif left_down(e) or right_up(e):
             character.dir, character.face_dir = -1, -1
         character.action = 9
-        landing(character)
     @staticmethod
     def exit(character, e):
         pass
 
     @staticmethod
     def do(character):
-        character.frame = (character.frame + 9 * ACTION_PER_TIME * game_framework.frame_time) % 9
+        character.frame = (character.frame + 8 * ACTION_PER_TIME * game_framework.frame_time) % 8
         character.x += character.dir * RUN_SPEED_PPS * game_framework.frame_time
 
     @staticmethod
     def draw(character):
-        drawing(character, 0)
+        drawing(character, 1)
 
 
 class Sit:
@@ -113,9 +104,9 @@ class JumpIdle:
             character.frame = 0
             character.jump_time = get_time()
         elif right_down(e) or left_up(e):
-            character.face_dir = 1
-        elif left_down(e) or right_up(e):
             character.face_dir = -1
+        elif left_down(e) or right_up(e):
+            character.face_dir = 1
 
     @staticmethod
     def exit(character, e):
@@ -194,9 +185,9 @@ class FallIdle:
             character.action = 0
             character.frame = 0
         elif right_down(e) or left_up(e):
-            character.face_dir = 1
-        elif left_down(e) or right_up(e):
             character.face_dir = -1
+        elif left_down(e) or right_up(e):
+            character.face_dir = 1
 
 
     @staticmethod
@@ -217,7 +208,10 @@ class FallIdle:
 class FallMove:
     @staticmethod
     def enter(character, e):
-        if right_down(e) or left_up(e):
+        if motion_finish(e):
+            character.action = 0
+            character.frame = 0
+        elif right_down(e) or left_up(e):
             character.dir, character.face_dir = 1, 1
         elif left_down(e) or right_up(e):
             character.dir, character.face_dir = -1, -1
@@ -265,10 +259,10 @@ class Land:
 class Character:
 
     def __init__(self):
-        self.x, self.y = 400, 112
+        self.x, self.y = 100, 132
         self.face_dir = 1
         self.jump_time = 0
-        self.image = load_image('character.png')
+        self.image = load_image('resource\character\character.png')
         self.state_machine = StateMachine(self)
         self.state_machine.start(Idle)
         self.state_machine.set_transitions(
@@ -302,4 +296,7 @@ class Character:
     def handle_collision(self, group, other):
         if 'character:floor' or 'character:land':
             if self.state_machine.cur_state == FallIdle or self.state_machine.cur_state == FallMove:
-                self.state_machine.add_event(('LANDING', 0))
+                minX_f, minY_f, maxX_f, maxY_f = other.get_bb()
+                minX_c, minY_c, maxX_c, maxY_c = self.get_bb()
+                if minY_c > minY_f and minY_c < maxY_f:
+                    self.state_machine.add_event(('LANDING', 0))

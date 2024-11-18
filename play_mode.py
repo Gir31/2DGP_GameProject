@@ -1,9 +1,11 @@
 from pico2d import *
 import game_world
 import game_framework
-from floor_locate import *
+from background import Background
+from gate import Gate
+from object_locate import *
 from character import Character
-from grass import Grass
+from floor import Floor
 from land import Land
 
 
@@ -20,23 +22,33 @@ def handle_events():
 
 def init():
     global character
-    global floors
 
     character = Character()
     game_world.add_object(character, 3)
 
     game_world.add_collision_pair('character:floor', character, None)
 
-    floors = [Land(x, y) for x, y in floor_locate[Stage]]
+    floors = [Floor(x, y) for x, y in floor_locate[Stage]]
     game_world.add_objects(floors, 1)
 
     for floor in floors:
         game_world.add_collision_pair('character:floor', None, floor)
 
     game_world.add_collision_pair('character:land', character, None)
-    grass = Grass()
-    game_world.add_object(grass, 0)
-    game_world.add_collision_pair('character:land', None, grass)
+
+    lands = [Land(x * 354) for x in range(5)]
+    game_world.add_objects(lands, 1)
+
+    for land in lands:
+        game_world.add_collision_pair('character:land', None, land)
+
+    background = Background(Stage)
+    game_world.add_object(background, 0)
+
+    gate = Gate(Stage)
+    game_world.add_object(gate, 1)
+
+
 
 
 
