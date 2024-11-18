@@ -334,7 +334,7 @@ class Land:
     def draw(character):
         drawing(character, 12)
 
-class Character:
+class Prac:
 
     def __init__(self):
         self.x, self.y = 100, 132
@@ -349,7 +349,7 @@ class Character:
         self.state_machine.start(Idle)
         self.state_machine.set_transitions(
             {
-                Idle: {right_down: Run, left_down: Run, right_up: Idle, left_up: Idle,space_down : JumpIdle},
+                Idle: {right_down: Run, left_down: Run, right_up: Run, left_up: Run,space_down : JumpIdle},
                 Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle, space_down : JumpMove, character_falling : FallMove},
                 JumpIdle : {right_down: JumpMove, left_down: JumpMove, right_up : JumpMove, left_up : JumpMove, time_out : FallFromJump},
                 JumpMove : {right_down: JumpIdle, left_down: JumpIdle, right_up: JumpIdle, left_up: JumpIdle, time_out : FallFromJump},

@@ -34,6 +34,9 @@ def time_out(e):
 def motion_finish(e):
     return e[0] == 'MOTION_FINISH'
 
+def motion_move_finish(e):
+    return e[0] == 'MOTION_MOVE_FINISH'
+
 def character_landing(e):
     return e[0] == 'LANDING'
 
@@ -71,6 +74,7 @@ class StateMachine:
     def handle_event(self, e):
         for event, next_state in self.transitions[self.cur_state].items():
             if event(e):
+
                 self.cur_state.exit(self.o, e)
                 self.cur_state = next_state
                 self.cur_state.enter(self.o, e)

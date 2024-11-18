@@ -7,6 +7,7 @@ from object_locate import *
 from character import Character
 from floor import Floor
 from land import Land
+from prac import Prac
 
 
 def handle_events():
