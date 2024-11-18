@@ -36,7 +36,8 @@ class Idle:
             character.face_dir = -1
         elif left_down(e) or right_up(e):
             character.face_dir = 1
-        else: pass
+        elif motion_finish(e):
+            pass
 
         character.dir = 0
         character.action = 1
@@ -59,11 +60,13 @@ class Idle:
 class Run:
     @staticmethod
     def enter(character, e):
-        if right_down(e):
+        if right_down(e) or left_up(e):
             character.dir, character.face_dir = 1, 1
             character.accel_time = get_time()
-        elif left_down(e):
+        elif left_down(e) or right_up(e):
             character.dir, character.face_dir = -1, -1
+            character.accel_time = get_time()
+        elif motion_move_finish(e):
             character.accel_time = get_time()
 
 
@@ -309,12 +312,12 @@ class FallMove:
     def draw(character):
         drawing(character, 5)
 
-class Land:
+class LandIdle:
     @staticmethod
     def enter(character, e):
-        character.action = 9
-        character.frame = 0
-        character.dir = 0
+        if character_landing(e):
+            character.action = 9
+            character.frame = 0
 
     @staticmethod
     def exit(character, e):
@@ -322,13 +325,38 @@ class Land:
 
     @staticmethod
     def do(character):
-        TIME_PER_ACTION = 0.5
-        ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
-        character.frame = (character.frame + 4 * ACTION_PER_TIME * game_framework.frame_time) % 4
-
-        if character.frame > 3:
+        if character.frame <= 3:
+            TIME_PER_ACTION = 0.5
+            ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
+            character.frame = (character.frame + 4 * ACTION_PER_TIME * game_framework.frame_time) % 4
+        else:
+            print('finish')
             character.state_machine.add_event(('MOTION_FINISH', 0))
+
+    @staticmethod
+    def draw(character):
+        drawing(character, 12)
+
+class LandMove:
+    @staticmethod
+    def enter(character, e):
+        if character_landing(e):
+            character.action = 9
+            character.frame = 0
+
+    @staticmethod
+    def exit(character, e):
         pass
+
+    @staticmethod
+    def do(character):
+        if character.frame <= 3:
+            TIME_PER_ACTION = 0.5
+            ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
+            character.frame = (character.frame + 4 * ACTION_PER_TIME * game_framework.frame_time) % 4
+        else:
+            print('finish')
+            character.state_machine.add_event(('MOTION_MOVE_FINISH', 0))
 
     @staticmethod
     def draw(character):
@@ -349,14 +377,15 @@ class Character:
         self.state_machine.start(Idle)
         self.state_machine.set_transitions(
             {
-                Idle: {right_down: Run, left_down: Run, right_up: Idle, left_up: Idle,space_down : JumpIdle},
+                Idle: {right_down: Run, left_down: Run, right_up: Run, left_up: Run, space_down : JumpIdle},
                 Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle, space_down : JumpMove, character_falling : FallMove},
                 JumpIdle : {right_down: JumpMove, left_down: JumpMove, right_up : JumpMove, left_up : JumpMove, time_out : FallFromJump},
                 JumpMove : {right_down: JumpIdle, left_down: JumpIdle, right_up: JumpIdle, left_up: JumpIdle, time_out : FallFromJump},
                 FallFromJump : {motion_finish : FallIdle, motion_move_finish : FallMove},
-                FallIdle : {right_down: FallMove, left_down: FallMove, right_up: FallMove, left_up: FallMove,character_landing : Land},
-                FallMove: {right_down: FallIdle, left_down: FallIdle, right_up: FallIdle, left_up: FallIdle, character_landing: Land},
-                Land : {right_down: Run, left_down: Run, motion_finish : Idle}
+                FallIdle : {right_down: FallMove, left_down: FallMove, right_up: FallMove, left_up: FallMove, character_landing : LandIdle},
+                FallMove: {right_down: FallIdle, left_down: FallIdle, right_up: FallIdle, left_up: FallIdle, character_landing: LandMove},
+                LandIdle : {right_down: LandMove, left_down: LandMove, right_up: LandMove, left_up: LandMove, motion_finish : Idle},
+                LandMove : {right_down: LandIdle, left_down: LandIdle, right_up: LandIdle, left_up: LandIdle, motion_move_finish : Run}
             }
         )
 
@@ -365,7 +394,6 @@ class Character:
 
     def handle_event(self, event):
         self.state_machine.add_event(('INPUT', event))
-        pass
 
     def draw(self):
         self.state_machine.draw()
