@@ -25,9 +25,12 @@ def init():
     character = Character()
     game_world.add_object(character, 3)
 
+    game_world.add_collision_pair('character:land', character, None)
+
     for x, y in floor_locate[Stage]:
         land = Land(x, y)
         game_world.add_object(land, 1)
+        game_world.add_collision_pair('character:land', None, land)
 
     grass = Grass()
     game_world.add_object(grass, 0)
@@ -40,6 +43,7 @@ def finish():
 
 def update():
     game_world.update()
+    game_world.handle_collisions()
 
 def draw():
     clear_canvas()

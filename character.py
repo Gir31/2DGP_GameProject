@@ -1,25 +1,18 @@
-from pico2d import load_image, get_time
+from pico2d import load_image, get_time, draw_rectangle
+from sdl2.examples.draw import draw_rects
 
 import game_framework
 from state_machine import *
 from floor_locate import *
 
-def frame_value(frame, FRAMES_PER_ACTION):
-    TIME_PER_ACTION = 0.3
-    ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
+TIME_PER_ACTION = 0.3
+ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 
-    return (frame + FRAMES_PER_ACTION * ACTION_PER_TIME * game_framework.frame_time) % FRAMES_PER_ACTION
-
-
-def speed_value(KMPH):
-    PIXEL_PER_METER = (10.0 / 0.2)
-    RUN_SPEED_KMPH = KMPH
-    RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
-    RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
-    RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
-
-    return RUN_SPEED_PPS * game_framework.frame_time
-
+PIXEL_PER_METER = (10.0 / 0.2)
+RUN_SPEED_KMPH = 40.0
+RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
+RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
+RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 
 def drawing(character, count):
     if character.face_dir == 1:
@@ -27,6 +20,15 @@ def drawing(character, count):
     elif character.face_dir == -1:
         character.image.clip_composite_draw(int(character.frame + count) * 124, character.action * 124, 124, 124,
                                             0, 'h', character.x, character.y - 5, 124, 124)
+
+
+
+
+
+
+
+
+
 
 
 def landing(character):
@@ -67,7 +69,7 @@ class Idle:
 
     @staticmethod
     def do(character):
-        character.frame = frame_value(character.frame, 7)
+        character.frame = (character.frame + 7 * ACTION_PER_TIME * game_framework.frame_time) % 7
 
     @staticmethod
     def draw(character):
@@ -89,9 +91,8 @@ class Run:
 
     @staticmethod
     def do(character):
-        character.frame = frame_value(character.frame, 9)
-        character.x += character.dir * speed_value(30.0)
-        landing(character)
+        character.frame = (character.frame + 9 * ACTION_PER_TIME * game_framework.frame_time) % 9
+        character.x += character.dir * RUN_SPEED_PPS * game_framework.frame_time
         pass
 
     @staticmethod
@@ -113,7 +114,7 @@ class Sit:
 
     @staticmethod
     def do(character):
-        character.frame = frame_value(character.frame, 8)
+        character.frame = (character.frame + 8 * ACTION_PER_TIME * game_framework.frame_time) % 8
         pass
 
     @staticmethod
@@ -141,8 +142,8 @@ class JumpIdle:
     @staticmethod
     def do(character):
         if character.frame < 4:
-            character.frame = frame_value(character.frame, 5)
-        character.y += speed_value(40.0)
+            character.frame = (character.frame + 5 * ACTION_PER_TIME * game_framework.frame_time) % 5
+        character.y +=  RUN_SPEED_PPS * game_framework.frame_time
         if get_time() - character.jump_time > 0.5:
             character.state_machine.add_event(('TIME_OUT', 0))
 
@@ -170,10 +171,10 @@ class JumpMove:
     @staticmethod
     def do(character):
         if character.frame < 4:
-            character.frame = frame_value(character.frame, 5)
+            character.frame = (character.frame + 5 * ACTION_PER_TIME * game_framework.frame_time) % 5
 
-        character.y += speed_value(40.0)
-        character.x += character.dir * speed_value(40.0)
+        character.y += RUN_SPEED_PPS * game_framework.frame_time
+        character.x += character.dir * RUN_SPEED_PPS * game_framework.frame_time
         if get_time() - character.jump_time > 0.5:
             character.state_machine.add_event(('TIME_OUT', 0))
 
@@ -194,7 +195,7 @@ class FallFromJump:
 
     @staticmethod
     def do(character):
-        character.frame = frame_value(character.frame, 4)
+        character.frame = (character.frame + 4 * ACTION_PER_TIME * game_framework.frame_time) % 4
 
         if character.frame > 3:
             character.state_machine.add_event(('MOTION_FINISH', 0))
@@ -222,9 +223,9 @@ class FallIdle:
 
     @staticmethod
     def do(character):
-        character.y -= speed_value(35.30394)
+        character.y -= RUN_SPEED_PPS * game_framework.frame_time
         if character.frame < 2:
-            character.frame = frame_value(character.frame, 3)
+            character.frame = (character.frame + 3 * ACTION_PER_TIME * game_framework.frame_time) % 3
 
         landing(character)
         pass
@@ -248,10 +249,10 @@ class FallMove:
 
     @staticmethod
     def do(character):
-        character.y -= speed_value(35.30394)
-        character.x += character.dir * speed_value(40.0)
+        character.y -= RUN_SPEED_PPS * game_framework.frame_time
+        character.x += character.dir * RUN_SPEED_PPS * game_framework.frame_time
         if character.frame < 2:
-            character.frame = frame_value(character.frame, 3)
+            character.frame = (character.frame + 3 * ACTION_PER_TIME * game_framework.frame_time) % 3
 
         landing(character)
         pass
@@ -274,7 +275,7 @@ class Land:
 
     @staticmethod
     def do(character):
-        character.frame = frame_value(character.frame, 4)
+        character.frame = (character.frame + 4 * ACTION_PER_TIME * game_framework.frame_time) % 4
 
         if character.frame > 3:
             character.state_machine.add_event(('MOTION_FINISH', 0))
@@ -317,5 +318,14 @@ class Character:
 
     def draw(self):
         self.state_machine.draw()
+        draw_rectangle(*self.get_bb())
+
+    def get_bb(self):
+        return self.x - 25, self.y - 63, self.x + 25, self.y + 50
+
+    def handle_collision(self, group, other):
+        if 'character:land':
+            self.state_machine.add_event(('LANDING', 0))
+        pass
 
 
