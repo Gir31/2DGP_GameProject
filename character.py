@@ -23,6 +23,7 @@ class Idle:
 
 
         if character.jump == False and character.fall_from_jump == False and character.fall == False:
+            character.landing = False
             character.action = 1
             character.frame = 0
 
@@ -53,6 +54,12 @@ class Idle:
         elif character.fall == True:
             if character.frame < 2:
                 character.frame = (character.frame + 3 * ACTION_PER_TIME * game_framework.frame_time) % 3
+        elif character.landing == True:
+            if character.frame <= 3:
+                character.frame = (character.frame + 4 * ACTION_PER_TIME * game_framework.frame_time) % 4
+            else:
+                character.landing = False
+                character.state_machine.add_event(('AGAIN', 0))
         else:
             character.frame = (character.frame + 7 * ACTION_PER_TIME * game_framework.frame_time) % 7
 
@@ -64,6 +71,8 @@ class Idle:
             drawing(character, 8)
         elif character.fall == True:
             drawing(character, 5)
+        elif character.landing == True:
+            drawing(character, 12)
         else:
             drawing(character, 0)
 
@@ -77,6 +86,7 @@ class Move:
             character.dir, character.face_dir = -1, -1
 
         if character.jump == False and character.fall_from_jump == False and character.fall == False:
+            character.landing = False
             character.action = 9
             character.frame = 0
 
@@ -104,6 +114,12 @@ class Move:
         elif character.fall == True:
             if character.frame < 2:
                 character.frame = (character.frame + 3 * ACTION_PER_TIME * game_framework.frame_time) % 3
+        elif character.landing == True:
+            if character.frame <= 3:
+                character.frame = (character.frame + 4 * ACTION_PER_TIME * game_framework.frame_time) % 4
+            else:
+                character.landing = False
+                character.state_machine.add_event(('AGAIN', 0))
         else:
             character.frame = (character.frame + 7 * ACTION_PER_TIME * game_framework.frame_time) % 8
 
@@ -115,6 +131,8 @@ class Move:
             drawing(character, 8)
         elif character.fall == True:
             drawing(character, 5)
+        elif character.landing == True:
+            drawing(character, 12)
         else:
             drawing(character, 1)
 
@@ -129,6 +147,7 @@ class Character:
         self.jump_time = 0
         self.fall_from_jump = False
         self.fall = False
+        self.landing = False
         self.image = load_image("resource\character\character.png")
         self.state_machine = StateMachine(self)
         self.state_machine.start(Idle)
@@ -204,5 +223,7 @@ class Character:
                 self.character_land = True
                 if self.fall == True:
                     self.fall = False
-                    self.state_machine.add_event(('AGAIN', 0))
+                    self.landing = True
+                    self.action = 9
+                    self.frame = 0
 
