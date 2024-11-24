@@ -1,12 +1,5 @@
-from math import floor
-from unittest.mock import right
-
-from pico2d import load_image, get_time, draw_rectangle
-from sdl2.examples.draw import draw_rects
-
-import game_framework
+from pico2d import load_image, draw_rectangle
 from state_machine import *
-from object_locate import *
 
 def drawing(character, count):
     if character.face_dir == 1:
@@ -15,17 +8,6 @@ def drawing(character, count):
         character.image.clip_composite_draw(int(character.frame + count) * 124, character.action * 124, 124, 124,
                                             0, 'h', character.x, character.y - 5, 124, 124)
 
-def check_air(character):
-    for x, y in floor_locate[Stage]:
-        minX, minY, maxX, maxY = x - 77, y + 10, x + 77, y + 17
-        if character.y - 66 >= minY and character.y - 66 <= maxY:
-            if character.x >= minX - 25 and character.x <= maxX + 25:
-                return
-
-    if character.y - 66 <= 67:
-        return
-
-    character.state_machine.add_event(('FALL', 0))
 
 class Idle:
     @staticmethod
@@ -57,6 +39,7 @@ class Idle:
     def draw(character):
         drawing(character, 0)
 
+<<<<<<< HEAD
 class Run:
     @staticmethod
     def enter(character, e):
@@ -362,21 +345,20 @@ class LandMove:
     def draw(character):
         drawing(character, 12)
 
+=======
+>>>>>>> 4eb05157799b8a597be2de8cd47665e5ce346bb4
 class Character:
 
     def __init__(self):
         self.x, self.y = 100, 132
         self.dir = 0
         self.face_dir = 1
-        self.acceleration = 0.0 # m/s^2
-        self.air_acceleration = 0.0
-        self.jump_acceleration = 0.0
-        self.jump_time = 0
         self.image = load_image("resource\character\character.png")
         self.state_machine = StateMachine(self)
         self.state_machine.start(Idle)
         self.state_machine.set_transitions(
             {
+<<<<<<< HEAD
                 Idle: {right_down: Run, left_down: Run, right_up: Run, left_up: Run, space_down : JumpIdle},
                 Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle, space_down : JumpMove, character_falling : FallMove},
                 JumpIdle : {right_down: JumpMove, left_down: JumpMove, right_up : JumpMove, left_up : JumpMove, time_out : FallFromJump},
@@ -386,6 +368,9 @@ class Character:
                 FallMove: {right_down: FallIdle, left_down: FallIdle, right_up: FallIdle, left_up: FallIdle, character_landing: LandMove},
                 LandIdle : {right_down: LandMove, left_down: LandMove, right_up: LandMove, left_up: LandMove, motion_finish : Idle},
                 LandMove : {right_down: LandIdle, left_down: LandIdle, right_up: LandIdle, left_up: LandIdle, motion_move_finish : Run}
+=======
+
+>>>>>>> 4eb05157799b8a597be2de8cd47665e5ce346bb4
             }
         )
 
@@ -404,8 +389,4 @@ class Character:
 
     def handle_collision(self, group, other):
         if 'character:floor' or 'character:land':
-            if self.state_machine.cur_state == FallIdle or self.state_machine.cur_state == FallMove:
-                minX_f, minY_f, maxX_f, maxY_f = other.get_bb()
-                minX_c, minY_c, maxX_c, maxY_c = self.get_bb()
-                if minY_c > minY_f and minY_c < maxY_f:
-                    self.state_machine.add_event(('LANDING', 0))
+            pass
