@@ -7,7 +7,6 @@ def start_event(e):
 def right_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_RIGHT
 
-
 def right_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_RIGHT
 
@@ -42,6 +41,9 @@ def character_landing(e):
 
 def character_falling(e):
     return e[0] == 'FALL'
+
+def again_action(e):
+    return e[0] == 'AGAIN'
 
 
 class StateMachine:

@@ -91,3 +91,10 @@ class Gate:
         self.state_machine.update()
     def draw(self):
         self.state_machine.draw()
+        draw_rectangle(*self.get_bb())
+
+    def get_bb(self):
+        return self.x - 29, self.y - 160, self.x + 29, self.y + 160
+
+    def handle_collision(self, group, other):
+        pass

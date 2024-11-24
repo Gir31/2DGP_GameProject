@@ -7,7 +7,7 @@ from object_locate import *
 from character import Character
 from floor import Floor
 from land import Land
-from prac import Prac
+from wall import Wall
 
 
 def handle_events():
@@ -35,6 +35,11 @@ def init():
     for floor in floors:
         game_world.add_collision_pair('character:floor', None, floor)
 
+    game_world.add_collision_pair('character:wall', character, None)
+
+    walls = [Wall(x, y, dir) for x, y, dir in wall_locate]
+    game_world.add_objects(walls, 1)
+
     game_world.add_collision_pair('character:land', character, None)
 
     lands = [Land(x * 354) for x in range(5)]
@@ -43,8 +48,8 @@ def init():
     for land in lands:
         game_world.add_collision_pair('character:land', None, land)
 
-    #background = Background(Stage)
-    #game_world.add_object(background, 0)
+    background = Background(Stage)
+    game_world.add_object(background, 0)
 
     gate = Gate(Stage)
     game_world.add_object(gate, 1)
@@ -60,6 +65,7 @@ def finish():
 
 def update():
     game_world.update()
+    character.character_land = False
     game_world.handle_collisions()
 
 def draw():
