@@ -3,11 +3,13 @@ import game_world
 import game_framework
 from background import Background
 from gate import Gate
+from map_ import Map
 from object_locate import *
 from character import Character
 from floor import Floor
 from land import Land
 from wall import Wall
+import server
 
 def handle_events():
     events = get_events()
@@ -17,16 +19,17 @@ def handle_events():
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.quit()
         else:
-            character.handle_event(event)
+            server.character.handle_event(event)
 
 
 def init():
-    global character
+    server.map = Map()
+    game_world.add_object(server.map, 0)
 
-    character = Character()
-    game_world.add_object(character, 3)
+    server.character = Character()
+    game_world.add_object(server.character, 3)
 
-    game_world.add_collision_pair('character:floor', character, None)
+    game_world.add_collision_pair('character:floor', server.character, None)
 
     floors = [Floor(x, y) for x, y in floor_locate[Stage]]
     game_world.add_objects(floors, 1)
@@ -34,12 +37,12 @@ def init():
     for floor in floors:
         game_world.add_collision_pair('character:floor', None, floor)
 
-    game_world.add_collision_pair('character:wall', character, None)
+    game_world.add_collision_pair('character:wall', server.character, None)
 
     walls = [Wall(x, y, dir) for x, y, dir in wall_locate]
     game_world.add_objects(walls, 1)
 
-    game_world.add_collision_pair('character:land', character, None)
+    game_world.add_collision_pair('character:land', server.character, None)
 
     lands = [Land(x * 354) for x in range(5)]
     game_world.add_objects(lands, 1)
@@ -64,7 +67,7 @@ def finish():
 
 def update():
     game_world.update()
-    character.character_land = False
+    server.character.character_land = False
     game_world.handle_collisions()
 
 def draw():

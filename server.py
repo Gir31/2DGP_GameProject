@@ -1,0 +1,2 @@
+character = None
+map = None

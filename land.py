@@ -1,5 +1,7 @@
 from pico2d import load_image, draw_rectangle
 
+import server
+
 
 class Land:
     image = None
@@ -10,7 +12,10 @@ class Land:
             Land.image = load_image('resource\chap1_land.png')
 
     def draw(self):
-        self.image.draw(self.x, self.y)
+        sx = self.x - server.map.window_left
+        sy = self.y - server.map.window_bottom
+
+        self.image.draw(sx, sy)
         draw_rectangle(*self.get_bb())
 
     def update(self):

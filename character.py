@@ -1,14 +1,15 @@
-from pico2d import load_image, draw_rectangle, get_time
+from pico2d import load_image, draw_rectangle, get_time, clamp, get_canvas_width, get_canvas_height
 import game_framework
+import server
 from state_machine import *
 
 
 def drawing(character, count):
     if character.face_dir == 1:
-        character.image.clip_draw(int(character.frame + count) * 124, character.action * 124, 124, 124, character.x, character.y - 5)
+        character.image.clip_draw(int(character.frame + count) * 124, character.action * 124, 124, 124, character.sx, character.sy - 5)
     elif character.face_dir == -1:
         character.image.clip_composite_draw(int(character.frame + count) * 124, character.action * 124, 124, 124,
-                                            0, 'h', character.x, character.y - 5, 124, 124)
+                                            0, 'h', character.sx, character.sy - 5, 124, 124)
 
 class Idle:
     @staticmethod
@@ -140,6 +141,7 @@ class Character:
 
     def __init__(self):
         self.x, self.y = 100, 132
+        self.sx, self.sy = get_canvas_width() / 2, get_canvas_height() / 2
         self.dir = 0
         self.face_dir = 1
         self.character_land = True
@@ -158,10 +160,14 @@ class Character:
             }
         )
 
+        self.x = clamp(25.0, self.x, server.map.w - 25.0)
+        self.y = clamp(66.0, self.y, server.map.h - 66.0)
+
     def update(self):
         self.state_machine.update()
 
         PIXEL_PER_METER = (10.0 / 0.2)
+
         FALL_SPEED_KMPH = 80
         FALL_SPEED_MPM = (FALL_SPEED_KMPH * 1000.0 / 60.0)
         FALL_SPEED_MPS = (FALL_SPEED_MPM / 60.0)
@@ -186,7 +192,6 @@ class Character:
                 self.action = 0
                 self.frame = 0
 
-        PIXEL_PER_METER = (10.0 / 0.2)
         RUN_SPEED_KMPH = 60
         RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
         RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
@@ -195,6 +200,9 @@ class Character:
         self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
 
         self.y += GRAVITY
+
+        self.x = clamp(25.0, self.x, server.map.w - 25.0)
+        self.y = clamp(66.0, self.y, server.map.h - 66.0)
 
     def handle_event(self, event):
         if event.type == SDL_KEYDOWN:
@@ -208,6 +216,8 @@ class Character:
         self.state_machine.add_event(('INPUT', event))
 
     def draw(self):
+        self.sx, self.sy = self.x - server.map.window_left, self.y - server.map.window_bottom
+
         self.state_machine.draw()
         draw_rectangle(*self.get_bb())
 
