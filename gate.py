@@ -1,6 +1,7 @@
 import game_framework
 from pico2d import *
 
+import server
 from object_locate import gate_locate
 from state_machine import *
 
@@ -11,6 +12,7 @@ class Closed:
     @staticmethod
     def enter(gate, e):
         gate.frame = 0
+        gate.state = 'closed'
         pass
 
     @staticmethod
@@ -24,13 +26,14 @@ class Closed:
 
     @staticmethod
     def draw(gate):
-        gate.Images['Closed'][int(gate.frame)].draw(gate.x, gate.y)
+        gate.Images['Closed'][int(gate.frame)].draw(gate.sx, gate.sy)
 
     
 class Closing:
     @staticmethod
     def enter(gate, e):
         gate.frame = 0
+        gate.state = 'closing'
         pass
 
     @staticmethod
@@ -45,12 +48,13 @@ class Closing:
 
     @staticmethod
     def draw(gate):
-        gate.Images['Closing'][int(gate.frame)].draw(gate.x, gate.y)
+        gate.Images['Closing'][int(gate.frame)].draw(gate.sx, gate.sy)
     
 class Opening:
     @staticmethod
     def enter(gate, e):
         gate.frame = 0
+        gate.state = 'opening'
         pass
 
     @staticmethod
@@ -64,13 +68,15 @@ class Opening:
 
     @staticmethod
     def draw(gate):
-        gate.Images['Opening'][int(gate.frame)].draw(gate.x, gate.y)
+        gate.Images['Opening'][int(gate.frame)].draw(gate.sx, gate.sy)
 
 class Gate:
     Images = None
 
     def __init__(self, stage):
         self.x, self.y = gate_locate[stage]
+        self.sx, self.sy = None, None
+        self.state = 'closing'
         self.state_machine = StateMachine(self)
         self.state_machine.start(Closing)
         self.state_machine.set_transitions(
@@ -90,8 +96,11 @@ class Gate:
     def update(self):
         self.state_machine.update()
     def draw(self):
+        self.sx = self.x - server.map.window_left
+        self.sy = self.y - server.map.window_bottom
+
         self.state_machine.draw()
-        draw_rectangle(*self.get_bb())
+        draw_rectangle(self.sx - 29, self.sy - 160, self.sx + 29, self.sy + 160)
 
     def get_bb(self):
         return self.x - 29, self.y - 160, self.x + 29, self.y + 160

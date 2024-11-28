@@ -1,5 +1,7 @@
 from pico2d import load_image, draw_rectangle
 
+import server
+
 
 class Wall:
     image = None
@@ -10,12 +12,15 @@ class Wall:
             Wall.image = load_image('resource\Wall.png')
 
     def draw(self):
-        if self.dir == 1:
-            self.image.draw(self.x, self.y)
-        else:
-            self.image.composite_draw(0, 'h', self.x, self.y, 59, 242)
+        sx = self.x - server.map.window_left
+        sy = self.y - server.map.window_bottom
 
-        draw_rectangle(*self.get_bb())
+        if self.dir == 1:
+            self.image.draw(sx, sy)
+        else:
+            self.image.composite_draw(0, 'h', sx, sy, 59, 242)
+
+        draw_rectangle(sx - 29, sy - 121, sx + 29, sy + 121)
 
     def update(self):
         pass

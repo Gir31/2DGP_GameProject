@@ -23,12 +23,15 @@ def handle_events():
 
 
 def init():
+    # map 추가
     server.map = Map()
     game_world.add_object(server.map, 0)
 
+    # 캐릭터 추가
     server.character = Character()
     game_world.add_object(server.character, 3)
 
+    # 플랫폼 추가
     game_world.add_collision_pair('character:floor', server.character, None)
 
     floors = [Floor(x, y) for x, y in floor_locate[Stage]]
@@ -37,28 +40,33 @@ def init():
     for floor in floors:
         game_world.add_collision_pair('character:floor', None, floor)
 
+    # 벽 추가
     game_world.add_collision_pair('character:wall', server.character, None)
 
     walls = [Wall(x, y, dir) for x, y, dir in wall_locate]
     game_world.add_objects(walls, 1)
 
+    for wall in walls:
+        game_world.add_collision_pair('character:wall', None, wall)
+
+    # 땅 추가
     game_world.add_collision_pair('character:land', server.character, None)
 
-    lands = [Land(x * 354) for x in range(5)]
+    lands = [Land(x * 354) for x in range(13)]
     game_world.add_objects(lands, 1)
 
     for land in lands:
         game_world.add_collision_pair('character:land', None, land)
 
+    # 배경 추가
     background = Background(Stage)
     game_world.add_object(background, 0)
 
-    gate = Gate(Stage)
-    game_world.add_object(gate, 1)
+    # 게이트 추가
+    server.gate = Gate(Stage)
+    game_world.add_object(server.gate, 1)
 
-
-
-
+    game_world.add_collision_pair('character:gate', server.character, server.gate)
 
 
 def finish():
@@ -68,6 +76,7 @@ def finish():
 def update():
     game_world.update()
     server.character.character_land = False
+    server.character.block = 1
     game_world.handle_collisions()
 
 def draw():

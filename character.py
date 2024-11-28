@@ -144,6 +144,7 @@ class Character:
         self.sx, self.sy = get_canvas_width() / 2, get_canvas_height() / 2
         self.dir = 0
         self.face_dir = 1
+        self.block = 1
         self.character_land = True
         self.jump = False
         self.jump_time = 0
@@ -197,7 +198,7 @@ class Character:
         RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
         RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 
-        self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time
+        self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time * self.block
 
         self.y += GRAVITY
 
@@ -219,21 +220,66 @@ class Character:
         self.sx, self.sy = self.x - server.map.window_left, self.y - server.map.window_bottom
 
         self.state_machine.draw()
-        draw_rectangle(*self.get_bb())
+        draw_rectangle(self.sx - 25, self.sy - 66, self.sx + 25, self.sy + 50)
 
     def get_bb(self):
         return self.x - 25, self.y - 66, self.x + 25, self.y + 50
 
     def handle_collision(self, group, other):
-        if 'character:floor' or 'character:land':
-            minX_o, minY_o, maxX_o, maxY_o = other.get_bb()
-            minX_c, minY_c, maxX_c, maxY_c = self.get_bb()
+        match group:
+            case 'character:floor':
+                minX_o, minY_o, maxX_o, maxY_o = other.get_bb()
+                minX_c, minY_c, maxX_c, maxY_c = self.get_bb()
 
-            if minY_o < minY_c:
-                self.character_land = True
-                if self.fall == True:
-                    self.fall = False
-                    self.landing = True
-                    self.action = 9
-                    self.frame = 0
+                if minY_o < minY_c:
+                    self.character_land = True
+                    if self.fall == True:
+                        self.fall = False
+                        self.landing = True
+                        self.action = 9
+                        self.frame = 0
+            case 'character:land':
+                minX_o, minY_o, maxX_o, maxY_o = other.get_bb()
+                minX_c, minY_c, maxX_c, maxY_c = self.get_bb()
+
+                if minY_o < minY_c:
+                    self.character_land = True
+                    if self.fall == True:
+                        self.fall = False
+                        self.landing = True
+                        self.action = 9
+                        self.frame = 0
+            case 'character:wall':
+                PIXEL_PER_METER = (10.0 / 0.2)
+                RUN_SPEED_KMPH = 60
+                RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
+                RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
+                RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
+
+                self.x -= self.dir * RUN_SPEED_PPS * game_framework.frame_time * self.block
+                self.block = 0
+            case 'character:gate':
+                match other.state:
+                    case 'closed':
+                        PIXEL_PER_METER = (10.0 / 0.2)
+                        RUN_SPEED_KMPH = 60
+                        RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
+                        RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
+                        RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
+
+                        self.x -= self.dir * RUN_SPEED_PPS * game_framework.frame_time * self.block
+                        self.block = 0
+                    case 'closing':
+                        PIXEL_PER_METER = (10.0 / 0.2)
+                        RUN_SPEED_KMPH = 60
+                        RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
+                        RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
+                        RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
+
+                        self.x -= self.dir * RUN_SPEED_PPS * game_framework.frame_time * self.block
+                        self.block = 0
+                    case 'opening':
+                        pass
+
+
 

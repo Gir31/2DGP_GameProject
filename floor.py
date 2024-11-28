@@ -16,7 +16,7 @@ class Floor:
         sy = self.y - server.map.window_bottom
 
         self.image.draw(sx, sy)
-        draw_rectangle(*self.get_bb())
+        draw_rectangle(sx - 77, sy + 10, sx + 77, sy + 17)
 
     def update(self):
         pass
