@@ -142,6 +142,7 @@ class Character:
     def __init__(self):
         self.x, self.y = 100, 132
         self.sx, self.sy = get_canvas_width() / 2, get_canvas_height() / 2
+        self.ex_speed = 0
         self.dir = 0
         self.face_dir = 1
         self.block = 1
@@ -198,7 +199,7 @@ class Character:
         RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
         RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 
-        self.x += self.dir * RUN_SPEED_PPS * game_framework.frame_time * self.block
+        self.x += (self.dir * RUN_SPEED_PPS * game_framework.frame_time * self.block) + self.ex_speed
 
         self.y += GRAVITY
 
@@ -238,6 +239,31 @@ class Character:
                         self.landing = True
                         self.action = 9
                         self.frame = 0
+            case 'character:sink_floor':
+                if other.show == True:
+                    minX_o, minY_o, maxX_o, maxY_o = other.get_bb()
+                    minX_c, minY_c, maxX_c, maxY_c = self.get_bb()
+
+                    if minY_o < minY_c:
+                        self.character_land = True
+                        if self.fall == True:
+                            self.fall = False
+                            self.landing = True
+                            self.action = 9
+                            self.frame = 0
+            case 'character:patrol_floor':
+                minX_o, minY_o, maxX_o, maxY_o = other.get_bb()
+                minX_c, minY_c, maxX_c, maxY_c = self.get_bb()
+
+                if minY_o < minY_c:
+                    self.character_land = True
+                    self.ex_speed = other.speed
+                    if self.fall == True:
+                        self.fall = False
+                        self.landing = True
+                        self.action = 9
+                        self.frame = 0
+
             case 'character:land':
                 minX_o, minY_o, maxX_o, maxY_o = other.get_bb()
                 minX_c, minY_c, maxX_c, maxY_c = self.get_bb()
@@ -280,6 +306,7 @@ class Character:
                         self.block = 0
                     case 'opening':
                         pass
+
 
 
 

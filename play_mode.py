@@ -4,6 +4,7 @@ import game_framework
 from background import Background
 from gate import Gate
 from map_ import Map
+from moving_floor import Sink_floor, Patrol_floor
 from object_locate import *
 from character import Character
 from floor import Floor
@@ -40,6 +41,21 @@ def init():
     for floor in floors:
         game_world.add_collision_pair('character:floor', None, floor)
 
+    # 움직이는 플랫폼 추가
+    # 떨어지는 플랫폼
+    game_world.add_collision_pair('character:sink_floor', server.character, None)
+
+    sink_floor = Sink_floor(1000, 300)
+    game_world.add_object(sink_floor, 1)
+
+    game_world.add_collision_pair('character:sink_floor', None, sink_floor)
+    # 좌우로 움직이는 플랫폼
+    game_world.add_collision_pair('character:patrol_floor', server.character, None)
+
+    patrol_floor = Patrol_floor(2000, 300)
+    game_world.add_object(patrol_floor, 1)
+
+    game_world.add_collision_pair('character:patrol_floor', None, patrol_floor)
     # 벽 추가
     game_world.add_collision_pair('character:wall', server.character, None)
 
@@ -77,6 +93,7 @@ def update():
     game_world.update()
     server.character.character_land = False
     server.character.block = 1
+    server.character.ex_speed = 0
     game_world.handle_collisions()
 
 def draw():
