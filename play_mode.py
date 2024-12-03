@@ -9,6 +9,7 @@ from object_locate import *
 from character import Character
 from floor import Floor
 from land import Land
+from rifleman import Rifle
 from wall import Wall
 import server
 
@@ -31,6 +32,11 @@ def init():
     # 캐릭터 추가
     server.character = Character()
     game_world.add_object(server.character, 3)
+
+    # 몬스터 추가
+    # 라이플
+    rifle = Rifle(500, 100)
+    game_world.add_object(rifle, 3)
 
     # 플랫폼 추가
     game_world.add_collision_pair('character:floor', server.character, None)
