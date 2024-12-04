@@ -1,3 +1,5 @@
+from rifleman import Rifle
+
 world = [[] for layer in range(4)]
 collision_pairs = {}
 

@@ -35,9 +35,10 @@ def init():
 
     # 몬스터 추가
     # 라이플
-    rifle = Rifle(500, 100)
+    rifle = Rifle(500, 300)
     game_world.add_object(rifle, 3)
 
+    game_world.add_collision_pair('rifle:land', rifle, None)
     # 플랫폼 추가
     game_world.add_collision_pair('character:floor', server.character, None)
 
@@ -79,6 +80,7 @@ def init():
 
     for land in lands:
         game_world.add_collision_pair('character:land', None, land)
+        game_world.add_collision_pair('rifle:land', None, land)
 
     # 배경 추가
     background = Background(Stage)
