@@ -1,4 +1,9 @@
+import random
+
 from pico2d import *
+
+import game_clear_mode
+import game_over_mode
 import game_world
 import game_framework
 from background import Background
@@ -6,7 +11,7 @@ from gate import Gate
 from map_ import Map
 from moving_floor import Sink_floor, Patrol_floor
 from object_locate import *
-from character import Character
+from character import Character, Die
 from floor import Floor
 from land import Land
 from rifleman import Rifle
@@ -14,6 +19,12 @@ from wall import Wall
 import server
 
 def handle_events():
+    if server.character.state_machine.cur_state == Die:
+        game_framework.change_mode(game_over_mode)
+
+    if server.character.game_clear == True:
+        game_framework.change_mode(game_clear_mode)
+
     events = get_events()
     for event in events:
         if event.type == SDL_QUIT:
@@ -27,7 +38,7 @@ def handle_events():
 def init():
     # map 추가
     server.map = Map()
-    game_world.add_object(server.map, 0)
+    game_world.add_object(server.map, 3)
 
     # 캐릭터 추가
     server.character = Character()
@@ -35,38 +46,49 @@ def init():
 
     # 몬스터 추가
     # 라이플
-    rifle = Rifle(500, 300)
-    game_world.add_object(rifle, 3)
+    server.rifles = [Rifle(random.randint(300, 3700), random.randint(200, 1300)) for _ in range(5)]
+    game_world.add_objects(server.rifles, 3)
 
-    game_world.add_collision_pair('rifle:land', rifle, None)
+    for rifle in server.rifles:
+        game_world.add_collision_pair('fist:rifle', None, rifle)
+        game_world.add_collision_pair('rifle:land', rifle, None)
     # 플랫폼 추가
     game_world.add_collision_pair('character:floor', server.character, None)
 
-    floors = [Floor(x, y) for x, y in floor_locate[Stage]]
-    game_world.add_objects(floors, 1)
+    server.floors = [Floor(x, y) for x, y in floor_locate[Stage]]
+    game_world.add_objects(server.floors, 1)
 
-    for floor in floors:
+    for floor in server.floors:
         game_world.add_collision_pair('character:floor', None, floor)
-
+        for rifle in server.rifles:
+            game_world.add_collision_pair('rifle:floor', rifle, floor)
     # 움직이는 플랫폼 추가
     # 떨어지는 플랫폼
     game_world.add_collision_pair('character:sink_floor', server.character, None)
 
-    sink_floor = Sink_floor(1000, 300)
-    game_world.add_object(sink_floor, 1)
+    server.sink_floors = [Sink_floor(x, y) for x, y in sink_floor_locate[Stage]]
+    game_world.add_objects(server.sink_floors, 1)
 
-    game_world.add_collision_pair('character:sink_floor', None, sink_floor)
+    for sink_floor in server.sink_floors:
+        game_world.add_collision_pair('character:sink_floor', None, sink_floor)
     # 좌우로 움직이는 플랫폼
     game_world.add_collision_pair('character:patrol_floor', server.character, None)
 
-    patrol_floor = Patrol_floor(2000, 300)
-    game_world.add_object(patrol_floor, 1)
+    server.patrol_floors = [Patrol_floor(x, y, range) for x, y, range in patrol_floor_locate[Stage]]
+    game_world.add_objects(server.patrol_floors, 1)
 
-    game_world.add_collision_pair('character:patrol_floor', None, patrol_floor)
+    for patrol_floor in server.patrol_floors:
+        game_world.add_collision_pair('character:patrol_floor', None, patrol_floor)
     # 벽 추가
     game_world.add_collision_pair('character:wall', server.character, None)
 
-    walls = [Wall(x, y, dir) for x, y, dir in wall_locate]
+    walls = [Wall(29, 242 * y, 1) for y in range(7)]
+    game_world.add_objects(walls, 1)
+
+    for wall in walls:
+        game_world.add_collision_pair('character:wall', None, wall)
+
+    walls = [Wall(3971, 508 + 242 * y, -1) for y in range(5)]
     game_world.add_objects(walls, 1)
 
     for wall in walls:
@@ -75,10 +97,10 @@ def init():
     # 땅 추가
     game_world.add_collision_pair('character:land', server.character, None)
 
-    lands = [Land(x * 354) for x in range(13)]
-    game_world.add_objects(lands, 1)
+    server.lands = [Land(x * 354) for x in range(13)]
+    game_world.add_objects(server.lands, 1)
 
-    for land in lands:
+    for land in server.lands:
         game_world.add_collision_pair('character:land', None, land)
         game_world.add_collision_pair('rifle:land', None, land)
 
@@ -94,6 +116,7 @@ def init():
 
 
 def finish():
+    del server.map.BGMs
     game_world.clear()
     pass
 

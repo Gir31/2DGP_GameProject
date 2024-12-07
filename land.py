@@ -16,7 +16,6 @@ class Land:
         sy = self.y - server.map.window_bottom
 
         self.image.draw(sx, sy)
-        draw_rectangle(sx - 177, sy, sx + 177, sy + 67)
 
     def update(self):
         pass

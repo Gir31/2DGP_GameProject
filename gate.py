@@ -1,6 +1,7 @@
 import game_framework
 from pico2d import *
 
+import object_locate
 import server
 from object_locate import gate_locate
 from state_machine import *
@@ -63,12 +64,14 @@ class Opening:
 
     @staticmethod
     def do(gate):
-        gate.frame = (gate.frame + 7 * ACTION_PER_TIME * game_framework.frame_time) % 7
+        if gate.frame < 6.5:
+            gate.frame = (gate.frame + 7 * ACTION_PER_TIME * game_framework.frame_time) % 7
         pass
 
     @staticmethod
     def draw(gate):
-        gate.Images['Opening'][int(gate.frame)].draw(gate.sx, gate.sy)
+        if gate.frame < 6.5:
+            gate.Images['Opening'][int(gate.frame)].draw(gate.sx, gate.sy)
 
 class Gate:
     Images = None
@@ -81,7 +84,7 @@ class Gate:
         self.state_machine.start(Closing)
         self.state_machine.set_transitions(
             {
-                Closed : {},
+                Closed : {clear : Opening},
                 Closing : {motion_finish : Closed},
                 Opening : {}
             }
@@ -95,12 +98,14 @@ class Gate:
 
     def update(self):
         self.state_machine.update()
+        if object_locate.rifle_amount == 0:
+            self.state_machine.add_event(('CLEAR', 0))
+
     def draw(self):
         self.sx = self.x - server.map.window_left
         self.sy = self.y - server.map.window_bottom
 
         self.state_machine.draw()
-        draw_rectangle(self.sx - 29, self.sy - 160, self.sx + 29, self.sy + 160)
 
     def get_bb(self):
         return self.x - 29, self.y - 160, self.x + 29, self.y + 160

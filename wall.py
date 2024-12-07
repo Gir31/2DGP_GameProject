@@ -20,8 +20,6 @@ class Wall:
         else:
             self.image.composite_draw(0, 'h', sx, sy, 59, 242)
 
-        draw_rectangle(sx - 29, sy - 121, sx + 29, sy + 121)
-
     def update(self):
         pass
 

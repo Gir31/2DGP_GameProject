@@ -34,12 +34,18 @@ def remove_object(o):
     for layer in world:
         if o in layer:
             layer.remove(o)
+            remove_collision_object(o)
+            del o  # 메모리 삭제
             return
 
     raise ValueError('Cannot delete non existing object')
 
 def clear():
     for layer in world:
+        for o in layer:
+            layer.remove(o)
+            remove_collision_object(o)
+            del o  # 메모리 삭제
         layer.clear()
 
 def collide(a, b):
