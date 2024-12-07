@@ -16,7 +16,7 @@ class Background:
         self.frame = random.randint(0, 40)
         if Background.sky_images == None:
             Background.sky_images = {}
-            Background.sky_images[stage] = load_image("resource/background/chap%d/chap%d_background_sky.png"%(stage, stage))
+            Background.sky_images[stage] = load_image("resource/chap%d_background_sky.png"%stage)
 
     def update(self):
         pass

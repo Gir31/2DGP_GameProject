@@ -17,17 +17,17 @@ BULLET_SPEED_MPM = (BULLET_SPEED_KMPH * 1000.0 / 60.0)
 BULLET_SPEED_MPS = (BULLET_SPEED_MPM / 60.0)
 BULLET_SPEED_PPS = (BULLET_SPEED_MPS * PIXEL_PER_METER)
 
-state_name = [('Idle', 15), ('run_start', 1), ('running', 8), ('run_stop', 6), ('spawn', 22), ('coma_roop', 8), ('coma_end', 6)]
+state_name = [('Rifle_Idle', 15), ('run_start', 1), ('running', 8), ('run_stop', 6), ('spawn', 22), ('coma_roop', 8), ('coma_end', 6)]
 state_arm_name = [('aim', 3), ('ready', 1), ('shoot', 3)]
 state_body_name = [('aim', 3), ('ready', 1), ('shoot', 3)]
 
-state_count = {'Idle' : 15, 'run_start' : 1, 'running' : 8,
+state_count = {'Rifle_Idle' : 15, 'run_start' : 1, 'running' : 8,
                'run_stop' : 6, 'spawn' : 22, 'coma_roop' : 8, 'coma_end' : 6,
                'aim' : 3, 'ready' : 1, 'shoot' : 3
                }
 
 rifle_size = {
-    'Idle' : [(30, 70), (28, 68), (28, 69), (28, 69), (28, 69),
+    'Rifle_Idle' : [(30, 70), (28, 68), (28, 69), (28, 69), (28, 69),
               (28, 69), (28, 69), (28, 69), (28, 69), (28, 69),
               (28, 69), (25, 67), (26, 68), (26, 68), (26, 68)],
     'run_start' : [(28, 67)],
@@ -65,7 +65,7 @@ class Bullet:
 
     def __init__(self, x, y, aim_radian):
         if Bullet.image == None:
-            Bullet.image = load_image("resource/Rifleman/bullet.png")
+            Bullet.image = load_image("resource/bullet.png")
         self.x, self.y, self.aim_radian = x, y, aim_radian
         game_world.add_collision_pair('character:bullet', server.character, self)
 
@@ -131,28 +131,28 @@ class Rifle:
         if Rifle.state_images == None:
             Rifle.state_images = {}
             for name, number in state_name:
-                Rifle.state_images[name] = [load_image("resource/Rifleman/"+ name +" (%d).png" %(i + 1)) for i in range(number)]
+                Rifle.state_images[name] = [load_image("resource/"+ name +" (%d).png" %(i + 1)) for i in range(number)]
         if Rifle.arm_images == None:
             Rifle.arm_images = {}
             for name, number in state_arm_name:
-                Rifle.arm_images[name] = [load_image("resource/Rifleman/" + name + "_arm (%d).png" %(i + 1)) for i in range(number)]
+                Rifle.arm_images[name] = [load_image("resource/" + name + "_arm (%d).png" %(i + 1)) for i in range(number)]
         if Rifle.body_images == None:
             Rifle.body_images = {}
             for name, number in state_body_name:
-                Rifle.body_images[name] = [load_image("resource/Rifleman/" + name + "_body (%d).png" %(i + 1)) for i in range(number)]
+                Rifle.body_images[name] = [load_image("resource/" + name + "_body (%d).png" %(i + 1)) for i in range(number)]
 
         self.state = 'spawn'
         self.origin_state = 'spawn'
         self.build_behavior_tree()
 
         if not Rifle.reload_sound:
-            Rifle.reload_sound = load_wav("resource/Rifleman/reload.wav")
+            Rifle.reload_sound = load_wav("resource/reload.wav")
             Rifle.reload_sound.set_volume(50)
-            Rifle.fire_sound = load_wav("resource/Rifleman/fire.wav")
+            Rifle.fire_sound = load_wav("resource/fire.wav")
             Rifle.fire_sound.set_volume(50)
-            Rifle.walk_sound = load_wav("resource/Rifleman/walk.wav")
+            Rifle.walk_sound = load_wav("resource/walk.wav")
             Rifle.walk_sound.set_volume(50)
-            Rifle.destroy_sound = load_wav("resource/Rifleman/destroy.wav")
+            Rifle.destroy_sound = load_wav("resource/rifle_destroy.wav")
             Rifle.destroy_sound.set_volume(100)
 
     def update(self):
@@ -276,7 +276,7 @@ class Rifle:
                 self.hp -= other.damage
                 if self.hp <= 0:
                     object_locate.rifle_amount -= 1
-                    if server.rifle_number < object_locate.rifle_amount:
+                    if server.rifle_number < 30:
                         server.rifles.append(Rifle(random.randint(300, 3700), random.randint(200, 1300)))
                         game_world.add_object(server.rifles[server.rifle_number], 3)
 
@@ -359,7 +359,7 @@ class Rifle:
             return BehaviorTree.FAIL
 
     def is_resting(self):
-        if (self.state == 'Idle' and get_time() - self.initial_time < self.resting_time):
+        if (self.state == 'Rifle_Idle' and get_time() - self.initial_time < self.resting_time):
             return BehaviorTree.SUCCESS
         else:
             if self.arrival_flag == True:
@@ -443,7 +443,7 @@ class Rifle:
             return BehaviorTree.RUNNING
 
     def resting(self):
-        self.state = 'Idle'
+        self.state = 'Rifle_Idle'
         if not self.origin_state == self.state:
             self.origin_state = self.state
             self.frame = 0

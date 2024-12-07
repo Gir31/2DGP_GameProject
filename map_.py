@@ -14,7 +14,7 @@ class Map:
         self.BGMs = {}
         self.BGMs = [load_wav("resource/BGM (%d).wav" %(i + 1)) for i in range(5)]
         for i in range(5):
-            self.BGMs[i].set_volume(50)
+            self.BGMs[i].set_volume(40)
 
         self.BGMs[self.BGM_number].play()
 

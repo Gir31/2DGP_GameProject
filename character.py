@@ -242,9 +242,9 @@ class Fist:
         self.count = 0
 
         if not Fist.attack_air_sound:
-            Fist.attack_air_sound = load_wav("resource/character/attack_air.wav")
+            Fist.attack_air_sound = load_wav("resource/attack_air.wav")
             Fist.attack_air_sound.set_volume(50)
-            Fist.attack_rifle_sound = load_wav("resource/character/attack_rifle.wav")
+            Fist.attack_rifle_sound = load_wav("resource/attack_rifle.wav")
             Fist.attack_rifle_sound.set_volume(50)
 
     def draw(self):
@@ -303,7 +303,7 @@ class Character:
         self.attack = False
         self.fist = None
         self.land_flag, self.walk_time = False, 0
-        self.image = load_image("resource/character/character.png")
+        self.image = load_image("resource/character.png")
         self.state_machine = StateMachine(self)
         self.state_machine.start(Idle)
         self.state_machine.set_transitions(
@@ -317,13 +317,13 @@ class Character:
         self.x = clamp(25.0, self.x, server.map.w - 25.0)
         self.y = clamp(66.0, self.y, server.map.h - 66.0)
 
-        self.land_sound = load_wav("resource/character/land.wav")
+        self.land_sound = load_wav("resource/land.wav")
         self.land_sound.set_volume(32)
-        self.walk_sound = load_wav("resource/character/walk.wav")
+        self.walk_sound = load_wav("resource/c_walk.wav")
         self.walk_sound.set_volume(50)
-        self.jump_sound = load_wav("resource/character/jump.wav")
+        self.jump_sound = load_wav("resource/jump.wav")
         self.jump_sound.set_volume(32)
-        self.damaged_sound = load_wav("resource/character/damaged.wav")
+        self.damaged_sound = load_wav("resource/damaged.wav")
         self.damaged_sound.set_volume(50)
 
         self.game_clear = False
@@ -407,15 +407,16 @@ class Character:
         self.sx, self.sy = self.x - server.map.window_left, self.y - server.map.window_bottom
 
         self.state_machine.draw()
-        if self.damage == True:
-            self.font.draw(self.sx - 100, self.sy + 75, f'{self.hp:02d}', (255, 0, 0))
-            if get_time() - self.damage_time > 3:
-                self.damage, self.damage_time = False, 0
+        if self.hp > 0:
+            if self.damage == True:
+                self.font.draw(self.sx - 100, self.sy + 75, f'{self.hp:02d}', (255, 0, 0))
+                if get_time() - self.damage_time > 3:
+                    self.damage, self.damage_time = False, 0
 
-        if self.recovery == True and self.damage == False:
-            self.font.draw(self.sx - 100, self.sy + 75, f'{self.hp:02d}', (0, 255, 255))
-            if self.hp > 100:
-                self.hp = 100
+            if self.recovery == True and self.damage == False:
+                self.font.draw(self.sx - 100, self.sy + 75, f'{self.hp:02d}', (0, 255, 255))
+                if self.hp > 100:
+                    self.hp = 100
 
     def get_bb(self):
         return self.x - 25, self.y - 66, self.x + 25, self.y + 50

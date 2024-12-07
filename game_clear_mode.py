@@ -23,8 +23,8 @@ def handle_events():
 def init():
     global image, font, music, background, end_character
     background = Background(Stage)
-    end_character = load_image("resource/character/character.png")
-    image = [load_image("resource/background/chap1/end (%d).png" %(i + 1)) for i in range(79)]
+    end_character = load_image("resource/character.png")
+    image = [load_image("resource/end (%d).png" %(i + 1)) for i in range(79)]
     font = load_font('resource/ENCR10B.TTF',80)
     music = load_wav('resource/GAME_CLEAR_sound.wav')
     music.set_volume(40)

@@ -25,10 +25,10 @@ class Sink_floor:
         if Sink_floor.images == None:
             Sink_floor.images = {}
             for name in state_name:
-                Sink_floor.images[name] = [load_image("resource/sink_platform/"+ name +" (%d).png" %(i + 1)) for i in range(8)]
+                Sink_floor.images[name] = [load_image("resource/"+ name +" (%d).png" %(i + 1)) for i in range(8)]
 
         if not Sink_floor.destroy_sound:
-            Sink_floor.destroy_sound = load_wav("resource/sink_platform/destroy.wav")
+            Sink_floor.destroy_sound = load_wav("resource/destroy.wav")
             Sink_floor.destroy_sound.set_volume(32)
 
     def draw(self):
@@ -93,10 +93,10 @@ class Patrol_floor:
 
         if Patrol_floor.images == None:
             Patrol_floor.images = {}
-            Patrol_floor.images = [load_image("resource/move_platform/Idle (%d).png" % (i + 1)) for i in range(8)]
+            Patrol_floor.images = [load_image("resource/patrol (%d).png" % (i + 1)) for i in range(8)]
 
         if not Patrol_floor.move_sound:
-            Patrol_floor.move_sound = load_wav("resource/move_platform/move.wav")
+            Patrol_floor.move_sound = load_wav("resource/patrol_move.wav")
             Patrol_floor.move_sound.set_volume(5)
 
             Patrol_floor.move_sound.play()

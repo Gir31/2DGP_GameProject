@@ -92,9 +92,9 @@ class Gate:
 
         if Gate.Images == None:
             Gate.Images = {}
-            Gate.Images['Closed'] = [load_image("resource/gate/gate_closed (%d).png" %i) for i in range(1, 6)]
-            Gate.Images['Closing'] = [load_image("resource/gate/gate_closing (%d).png" % i) for i in range(1, 10)]
-            Gate.Images['Opening'] = [load_image("resource/gate/gate_opening (%d).png" % i) for i in range(1, 8)]
+            Gate.Images['Closed'] = [load_image("resource/gate_closed (%d).png" %i) for i in range(1, 6)]
+            Gate.Images['Closing'] = [load_image("resource/gate_closing (%d).png" % i) for i in range(1, 10)]
+            Gate.Images['Opening'] = [load_image("resource/gate_opening (%d).png" % i) for i in range(1, 8)]
 
     def update(self):
         self.state_machine.update()
