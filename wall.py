@@ -9,7 +9,7 @@ class Wall:
     def __init__(self, x, y, dir):
         self.x, self.y, self.dir = x, y, dir
         if Wall.image == None:
-            Wall.image = load_image('resource\Wall.png')
+            Wall.image = load_image('resource/Wall.png')
 
     def draw(self):
         sx = self.x - server.map.window_left

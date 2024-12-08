@@ -9,7 +9,7 @@ class Floor:
         self.x, self.y = x, y
 
         if Floor.image == None:
-            Floor.image = load_image('resource\Platform.png')
+            Floor.image = load_image('resource/Platform.png')
 
     def draw(self):
         sx = self.x - server.map.window_left

@@ -9,7 +9,7 @@ class Land:
     def __init__(self, x):
         self.x, self.y = x, 0
         if Land.image == None:
-            Land.image = load_image('resource\chap1_land.png')
+            Land.image = load_image('resource/chap1_land.png')
 
     def draw(self):
         sx = self.x - server.map.window_left
